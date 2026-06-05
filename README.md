@@ -1,21 +1,23 @@
 # Copyright Traps Replication
 
-This repository contains replication and extension scripts for experiments based on *Copyright Traps for Large Language Models*.
+This repository contains the scripts and lightweight results for a replication/extension of the *Copyright Traps for Large Language Models* experiment.
 
-The experiments use TinyLlama-1.1B-Chat-v1.0, a synthetic continued-pretraining corpus, generated member/non-member trap sequences, and perplexity-based Membership Inference Attacks.
+The experiment uses TinyLlama-1.1B-Chat-v1.0, a synthetic continued-pretraining corpus, generated member/non-member trap sequences, and perplexity-based Membership Inference Attacks.
 
-## Main components
+## Pipeline
 
-- `scripts/make_large_paper_style_dataset.py` — creates the synthetic training corpus.
-- `scripts/train_continued_pretraining.py` — performs continued pretraining and saves checkpoints.
-- `scripts/run_mia_paper_style.py` — evaluates Membership Inference Attack performance.
-- `scripts/diagnose_trap_learning.py` — analyzes member/non-member trap perplexity across epochs.
-- `scripts/analyze_mia_by_nrep.py` — analyzes MIA performance by trap repetition count.
-- `scripts/evaluate_utility_perplexity.py` — evaluates model utility using perplexity.
-- `scripts/plot_memorization_by_epoch.py` — generates memorization-over-time plots.
-- `scripts/plot_utility_by_epoch.py` — generates utility-over-time plots.
+1. Generate member traps using `src/scripts/gen_traps.py`.
+2. Generate non-member traps using `src/scripts/gen_traps.py`.
+3. Create the synthetic corpus with `scripts/make_large_paper_style_dataset.py`.
+4. Inject member traps with `scripts/make_paper_style_dataset.py`.
+5. Run continued pretraining with `scripts/train_continued_pretraining.py`.
+6. Evaluate Membership Inference Attack with `scripts/run_mia_paper_style.py`.
+7. Run memorization diagnostics with `scripts/diagnose_trap_learning.py`.
+8. Evaluate utility with `scripts/eval_utility_perplexity.py`.
+9. Generate plots with `scripts/plot_memorization_by_epoch.py` and `scripts/plot_utility_by_epoch.py`.
 
-## Results
+## Outputs
 
-Key result files are stored in `results/`.
+Lightweight CSV and PNG outputs are stored in `results/`.
 
+Large generated datasets, trap `.pkl` files, and model checkpoints are intentionally excluded from this repository.

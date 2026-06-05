@@ -1,22 +1,23 @@
 __pycache__/
 *.pyc
+
+data/
 *.pkl
 *.pt
 *.bin
 *.safetensors
-*.model
 *.arrow
 *.lock
 
-data/
+continued_pretraining_epoch*/
 checkpoints/
 outputs/
 logs/
 wandb/
 
-continued_pretraining_epoch*/
-.cache/
 .venv/
 venv/
 researchenv/
 traps_env/
+.cache/
+
