@@ -1,9 +1,0 @@
-bucket,type,mean,median
-"(np.int64(1), np.int64(11))",member,13.272749,10.248796
-"(np.int64(1), np.int64(11))",non_member,13.10283,11.168379
-"(np.int64(11), np.int64(21))",member,30.393797,28.4916
-"(np.int64(11), np.int64(21))",non_member,30.456543,28.68705
-"(np.int64(21), np.int64(31))",member,47.500595,44.0856
-"(np.int64(21), np.int64(31))",non_member,46.515488,44.518238
-"(np.int64(31), np.int64(41))",member,64.54102,61.266685
-"(np.int64(31), np.int64(41))",non_member,67.58079,61.86828
