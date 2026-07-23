@@ -1,22 +1,39 @@
+# Python & Environments
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.swp
+.venv/
+traps_env/
 
+# Data, Checkpoints & Logs
 data/
+checkpoints/
+logs/
 *.pkl
 *.pt
-*.bin
 *.safetensors
-*.arrow
-*.lock
-
-continued_pretraining_epoch*/
-checkpoints/
-outputs/
-logs/
-wandb/
-
+*.bin
+*.log
+*.txt
+EOF1~
+cat << 'EOF' > .gitignore
+# Python & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.swp
 .venv/
-venv/
-researchenv/
 traps_env/
-.cache/
+
+# Data, Checkpoints & Logs
+data/
+checkpoints/
+logs/
+*.pkl
+*.pt
+*.safetensors
+*.bin
+*.log
+*.txt
+
