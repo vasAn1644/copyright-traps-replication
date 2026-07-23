@@ -24,7 +24,8 @@ def gen_single_unit_buckets(model: LlamaForCausalLM, tokenizer: LlamaTokenizer, 
     ppl_range = args.max_perplexity - args.min_perplexity + 1
     traps = {i: [] for i in range(args.min_perplexity, args.max_perplexity + 1)}
 
-    input = tokenizer([""] * args.batch_size, return_tensors="pt").to(args.device)
+    bos_token = tokenizer.bos_token if tokenizer.bos_token is not None else "<s>"
+    input = tokenizer([bos_token] * args.batch_size, return_tensors="pt").to(args.device)
     samples_per_unit = args.num_traps // ppl_range
 
     total_samples = 0
@@ -47,8 +48,13 @@ def gen_single_unit_buckets(model: LlamaForCausalLM, tokenizer: LlamaTokenizer, 
                 generated_ids = model.generate(
                     input["input_ids"],
                     max_length=args.seq_len + 1,
+                    max_new_tokens=None,
                     do_sample=True,
                     temperature=temp,
+                    top_k=50,  # як у пейпері
+                    bos_token_id=tokenizer.bos_token_id,
+                    eos_token_id=tokenizer.eos_token_id,
+                    pad_token_id=tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id,
                 )
 
                 if args.retokenize:
