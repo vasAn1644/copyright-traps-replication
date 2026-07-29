@@ -1,3 +1,4 @@
+import os
 import sys
 import torch
 from datasets import load_from_disk
@@ -9,18 +10,13 @@ from transformers import (
     DataCollatorForLanguageModeling,
 )
 
-# 1. ВИПРАВЛЕНО: Вказуємо саме ту модель, для якої робилася ін'єкція пасток
 MODEL_ID = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-
-# 2. ВИПРАВЛЕНО: Шлях до нового датасету з 100 повтореннями
 DATASET_PATH = "data/injected_dataset_100reps"
 
 if len(sys.argv) != 2:
     raise ValueError("Usage: python train_continued_pretraining.py <epochs>")
 
 epochs = int(sys.argv[1])
-
-# 3. ВИПРАВЛЕНО: Зрозуміла назва папки виходу під новий експеримент
 OUT_DIR = f"data/continued_pretraining_100reps_epoch{epochs}"
 
 print("==========================================")
@@ -30,12 +26,12 @@ print("Epochs:", epochs)
 print("Output:", OUT_DIR)
 print("==========================================")
 
-# 4. Завантаження токенізатора
+# Load tokenizer
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=True)
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
-# 5. Завантаження датасету
+# Load dataset
 dataset = load_from_disk(DATASET_PATH)
 
 print("Dataset size:", len(dataset))
@@ -45,7 +41,7 @@ def tokenize_fn(examples):
     return tokenizer(
         examples["text"],
         truncation=True,
-        max_length=512,  # Або 1024/2048 залежно від довжини ваших документів
+        max_length=512,
         padding=False,
     )
 
@@ -54,12 +50,12 @@ tokenized = dataset.map(
     tokenize_fn,
     batched=True,
     remove_columns=dataset.column_names,
-    desc="Running tokenizer on dataset"
+    desc="Running tokenizer on dataset",
 )
 
 print("Tokenized size:", len(tokenized))
 
-# 6. Завантаження моделі
+# Load model
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     torch_dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
@@ -68,16 +64,16 @@ model = AutoModelForCausalLM.from_pretrained(
 
 model.config.use_cache = False
 
-# 7. Параметри тренування
+# Set up training arguments
 args = TrainingArguments(
     output_dir=OUT_DIR,
-    per_device_train_batch_size=4,  # Для TinyLlama можна ставити 4 або 8 на GPU WatGPU
-    gradient_accumulation_steps=2,   # Ефективний батч = 4 * 2 = 8
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=2,
     num_train_epochs=epochs,
     learning_rate=2e-5,
     logging_steps=10,
     save_strategy="epoch",
-    save_total_limit=1,              # Бережемо диск на кластері
+    save_total_limit=1,
     bf16=torch.cuda.is_bf16_supported(),
     fp16=not torch.cuda.is_bf16_supported(),
     report_to="none",
@@ -98,11 +94,14 @@ trainer = Trainer(
     data_collator=collator,
 )
 
-print("🚀 Starting training...")
-trainer.train()
+# Resume from existing checkpoint if available
+resume_checkpoint = True if os.path.exists(OUT_DIR) and os.listdir(OUT_DIR) else False
 
-# 8. Збереження фінальної моделі
+print("Starting training...")
+trainer.train(resume_from_checkpoint=resume_checkpoint)
+
+# Save final model and tokenizer
 trainer.save_model(OUT_DIR)
 tokenizer.save_pretrained(OUT_DIR)
 
-print(f"✅ Saved continued-pretrained model to {OUT_DIR}")
+print(f"Saved continued-pretrained model to {OUT_DIR}")
